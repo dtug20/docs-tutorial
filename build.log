@@ -1,0 +1,25 @@
+
+> docs-tutorial@0.1.0 build
+> next build
+
+   ▲ Next.js 15.0.3
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/documents/[documentId]/editor.tsx
+24:19  Error: 'props' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/documents/[documentId]/page.tsx
+9:13  Error: 'documentId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/documents/[documentId]/toolbar.tsx
+25:5  Error: 'DropdownMenuItem' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/combobox.tsx
+277:3  Error: 'children' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/building-your-application/configuring/eslint#disabling-rules
