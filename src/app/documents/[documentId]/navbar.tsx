@@ -2,6 +2,8 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
+
 import {
     FileIcon,
     FileJsonIcon,
@@ -233,6 +235,15 @@ export const Navbar = () => {
                         </Menubar>
                     </div>
                 </div>
+            </div>
+            <div className="flex gap-3 items-center pl-6">
+                <OrganizationSwitcher
+                    afterCreateOrganizationUrl="/"
+                    afterLeaveOrganizationUrl="/"
+                    afterSelectOrganizationUrl="/"
+                    afterSelectPersonalUrl="/"
+                />
+                <UserButton />
             </div>
         </nav>
     );
