@@ -1,0 +1,85 @@
+'use client';
+
+import { BellIcon } from "lucide-react";
+import { ClientSideSuspense } from "@liveblocks/react";
+import { InboxNotification, InboxNotificationList } from "@liveblocks/react-ui";
+import { useInboxNotifications, useUnreadInboxNotificationsCount, useMarkInboxNotificationAsRead } from "@liveblocks/react/suspense";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+
+export const Inbox = () => {
+    return (
+        <ClientSideSuspense fallback={
+            <>
+                <Button
+                    variant={"ghost"}
+                    disabled
+                    className="relative"
+                    size="icon"
+                >
+                    <BellIcon className="size-5" />
+                </Button>
+                <Separator orientation="vertical" className="h-6" />
+            </>
+        }>
+            <InboxMenu />
+        </ClientSideSuspense>
+    )
+}
+
+const InboxMenu = () => {
+    const router = useRouter();
+    const { inboxNotifications } = useInboxNotifications();
+    const { count } = useUnreadInboxNotificationsCount();
+    const markInboxNotificationAsRead = useMarkInboxNotificationAsRead();
+
+    return (
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant={"ghost"}
+                        className="relative"
+                        size="icon"
+                    >
+                        <BellIcon className="size-5" />
+                        {count > 0 && (
+                            <span className="absolute -top-1 -right-1 size-4 rounded-full bg-sky-500 text-xs text-white flex items-center justify-center">
+                                {count}
+                            </span>
+                        )}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-auto">
+                    {inboxNotifications.length > 0 ? (
+                        <InboxNotificationList>
+                            {inboxNotifications.map((inboxNotification) => (
+                                <InboxNotification
+                                    key={inboxNotification.id}
+                                    inboxNotification={inboxNotification}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        markInboxNotificationAsRead(inboxNotification.id);
+                                        router.push(`/documents/${inboxNotification.roomId}`);
+                                    }}
+                                />
+                            ))}
+                        </InboxNotificationList>
+                    ) : (
+                        <div className='p-2 w-[400px] text-center text-sm text-muted-foreground'>
+                            No notifications
+                        </div>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <Separator orientation="vertical" className="h-6" />
+        </>
+    );
+};

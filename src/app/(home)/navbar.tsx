@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { SearchInput } from "./search-input";
+import { NavbarInbox } from "./navbar-inbox";
 
 export const Navbar = () => {
     return (
@@ -22,6 +23,7 @@ export const Navbar = () => {
                     afterSelectOrganizationUrl="/"
                     afterSelectPersonalUrl="/"
                 />
+                <NavbarInbox />
                 <UserButton />
             </div>
         </nav>

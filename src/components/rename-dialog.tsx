@@ -66,27 +66,27 @@ export const RenameDialog = ({ documentId, initialTitle, children }: RenameDialo
                             onClick={(e) => e.stopPropagation()}
                         />
                     </div>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            disabled={isUpdating}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                setOpen(false);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isUpdating}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            Save
+                        </Button>
+                    </DialogFooter>
                 </form>
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        disabled={isUpdating}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            setOpen(false);
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        disabled={isUpdating}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        Save
-                    </Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
