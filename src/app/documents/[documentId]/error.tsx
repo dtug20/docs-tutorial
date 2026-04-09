@@ -15,8 +15,12 @@ const ErrorPage = ({ error, reset }: ErrorProps) => {
     const router = useRouter();
 
     useEffect(() => {
-        if (error.message.toLowerCase().includes("document not found")) {
+        const lowerMessage = error.message.toLowerCase();
+        if (lowerMessage.includes("document not found")) {
             toast.error("Document not found or has been removed.");
+            router.push("/");
+        } else if (lowerMessage.includes("unauthorized") || lowerMessage.includes("not authorized")) {
+            toast.error("You do not have permission to access this document.");
             router.push("/");
         }
     }, [error, router]);

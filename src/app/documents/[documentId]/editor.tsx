@@ -17,7 +17,7 @@ import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import StarterKit from '@tiptap/starter-kit';
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useStorage } from "@liveblocks/react";
+import { useStorage, useSelf } from "@liveblocks/react/suspense";
 
 import { FontSizeExtension } from '@/extensions/font-size';
 import { LineHeightExtension } from '@/extensions/line-height';
@@ -42,7 +42,11 @@ export const Editor = ({ initialContent }: EditorProps) => {
         offlineSupport_experimental: true,
     });
     const { setEditor } = useEditorStore();
+
+    const canWrite = useSelf((me) => me.canWrite);
+
     const editor = useEditor({
+        editable: canWrite,
         immediatelyRender: false,
         onCreate({ editor }) {
             setEditor(editor);

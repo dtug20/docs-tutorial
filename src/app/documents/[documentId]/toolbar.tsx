@@ -51,6 +51,9 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 
+import { useMutation, useConvex } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+
 const LineHeightButton = () => {
     const { editor } = useEditorStore();
 
@@ -280,6 +283,8 @@ const ImageButton = () => {
     const { editor } = useEditorStore();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [imageURL, setImageURL] = useState("");
+    const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+    const convex = useConvex();
 
     const onChange = (src: string) => {
         editor?.chain().focus().setImage({ src }).run();
@@ -290,11 +295,24 @@ const ImageButton = () => {
         input.type = "file";
         input.accept = "image/*";
 
-        input.onchange = (e) => {
+        input.onchange = async (e) => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (file) {
-                const imageURL = URL.createObjectURL(file);
-                onChange(imageURL);
+                const postUrl = await generateUploadUrl();
+                
+                const result = await fetch(postUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": file.type },
+                    body: file,
+                });
+                
+                const { storageId } = await result.json();
+                
+                const url = await convex.query(api.storage.getImageUrl, { storageId });
+                
+                if (url) {
+                    onChange(url);
+                }
             }
         }
 
@@ -572,8 +590,15 @@ const ToolbarButton = ({
 }
 
 
+import { useSelf } from "@liveblocks/react/suspense";
+
 export const ToolBar = () => {
     const { editor } = useEditorStore();
+    const canWrite = useSelf((me) => me.canWrite);
+
+    if (!canWrite) {
+        return null;
+    }
 
     const sections: {
         label: string;

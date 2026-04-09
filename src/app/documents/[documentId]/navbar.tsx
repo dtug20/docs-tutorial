@@ -2,7 +2,8 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
+import { OrganizationSwitcher, UserButton, useOrganizationList, useUser } from "@clerk/nextjs"
+import { Button } from "@/components/ui/button"
 
 import {
     FileIcon,
@@ -38,6 +39,7 @@ import {
 
 import { RenameDialog } from "@/components/rename-dialog";
 import { RemoveDialog } from "@/components/remove-dialog";
+import { ShareDialog } from "@/components/share-dialog";
 import { DocumentInput } from "./document-input"
 import { BsFilePdf } from "react-icons/bs"
 import { Avatars } from "./avatars"
@@ -57,6 +59,20 @@ export const Navbar = ({ data }: NavbarProps) => {
     const router = useRouter();
     const { editor } = useEditorStore();
     const mutation = useMutation(api.documents.create);
+
+    const { user } = useUser();
+    const isOwner = user?.id === data.ownerId;
+
+    const { userMemberships } = useOrganizationList({
+        userMemberships: {
+            infinite: true,
+        },
+    });
+
+    const isOrganizationDocument = !!data.organizationId;
+    const documentOrganization = userMemberships.data?.find(
+        (membership) => membership.organization.id === data.organizationId
+    )?.organization;
 
     const onNewDocument = () => {
         mutation({
@@ -123,8 +139,25 @@ export const Navbar = ({ data }: NavbarProps) => {
                 <Link href="/">
                     <Image src="/logo.svg" alt="Logo" width={36} height={36} />
                 </Link>
-                <div className="flex flex-col">
-                    <DocumentInput title={data.title} id={data._id} />
+                <div className="flex flex-col px-1">
+                    <div className="flex items-center gap-2">
+                        <DocumentInput title={data.title} id={data._id} />
+                        {isOrganizationDocument && documentOrganization && (
+                            <span className="text-[10px] bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded-sm font-medium">
+                                {documentOrganization.name}
+                            </span>
+                        )}
+                        {isOrganizationDocument && !documentOrganization && (
+                             <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-sm font-medium">
+                                Team Document
+                            </span>
+                        )}
+                        {!isOrganizationDocument && (
+                             <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-sm font-medium">
+                                Personal
+                            </span>
+                        )}
+                    </div>
                     <div className="flex">
                         <Menubar className="border-none bg-transparent shadow-none h-auto p-0">
                             <MenubarMenu>
@@ -272,6 +305,13 @@ export const Navbar = ({ data }: NavbarProps) => {
                 </div>
             </div>
             <div className="flex gap-3 items-center pl-6">
+                {isOwner && (
+                    <ShareDialog documentId={data._id} initialPublicAccess={data.publicAccess}>
+                        <Button variant="default" size="sm" className="h-8 shadow-sm px-4">
+                            Share
+                        </Button>
+                    </ShareDialog>
+                )}
                 <Avatars />
                 <Inbox />
                 <OrganizationSwitcher

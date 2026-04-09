@@ -10,7 +10,7 @@ const liveblocks = new Liveblocks({
 });
 
 export async function POST(req: Request) {
-    const { sessionClaims } = await auth();
+    const { sessionClaims, getToken } = await auth();
 
     if (!sessionClaims) {
         return new Response("Unauthorized", { status: 401 });
@@ -22,6 +22,9 @@ export async function POST(req: Request) {
     }
 
     let room;
+    let hasFullAccess = false;
+    let hasReadAccess = false;
+
     try {
         const body = await req.json();
         room = body?.room;
@@ -30,6 +33,11 @@ export async function POST(req: Request) {
     }
 
     if (room) {
+        const token = await getToken({ template: "convex" });
+        if (token) {
+            convex.setAuth(token);
+        }
+
         const document = await convex.query(api.documents.getById, { id: room });
 
         if (!document) {
@@ -49,8 +57,17 @@ export async function POST(req: Request) {
             );
         }
 
-        if (!isOwner && !isOrganizationMember) {
+        const isPublicModify = document.publicAccess === "modify";
+        const isPublicView = document.publicAccess === "view";
+
+        if (!isOwner && !isOrganizationMember && !isPublicModify && !isPublicView) {
             return new Response("Unauthorized", { status: 401 });
+        }
+
+        if (isOwner || isOrganizationMember || isPublicModify) {
+            hasFullAccess = true;
+        } else if (isPublicView) {
+            hasReadAccess = true;
         }
     }
 
@@ -62,7 +79,11 @@ export async function POST(req: Request) {
     });
 
     if (room) {
-        session.allow(room, session.FULL_ACCESS);
+        if (hasFullAccess) {
+            session.allow(room, session.FULL_ACCESS);
+        } else if (hasReadAccess) {
+            session.allow(room, session.READ_ACCESS);
+        }
     }
     const { body, status } = await session.authorize();
 

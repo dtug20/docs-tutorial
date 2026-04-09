@@ -5,7 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useDebounce } from "@/hooks/use-debouce";
 import { toast } from "sonner";
-import { useStatus } from "@liveblocks/react";
+import { useStatus, useSelf } from "@liveblocks/react/suspense";
 import { LoaderIcon } from "lucide-react";
 
 interface DocumentInputProps {
@@ -15,6 +15,7 @@ interface DocumentInputProps {
 
 export const DocumentInput = ({ title, id }: DocumentInputProps) => {
     const status = useStatus();
+    const canWrite = useSelf((me) => me.canWrite);
 
     const [value, setValue] = useState(title);
     const [isPending, setIsPending] = useState(false);
@@ -75,6 +76,7 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
             ) : (
                 <span
                     onClick={() => {
+                        if (!canWrite) return;
                         setIsEditing(true);
                         setTimeout(() => {
                             inputRef.current?.focus();

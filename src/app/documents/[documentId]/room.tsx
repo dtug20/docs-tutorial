@@ -8,7 +8,7 @@ import {
 } from "@liveblocks/react/suspense";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { FullscreenLoader } from "@/components/fullscreen-loader";
@@ -39,6 +39,13 @@ export function Room({ children }: { children: ReactNode }) {
         },
         [document?.organizationId],
     );
+
+    const mutateAccess = useMutation(api.documents.recordAccess);
+    useEffect(() => {
+        if (documentId) {
+            mutateAccess({ documentId: documentId as Id<"documents"> }).catch(() => {});
+        }
+    }, [documentId, mutateAccess]);
 
     useEffect(() => {
         fetchUsers();

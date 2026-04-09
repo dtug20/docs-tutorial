@@ -54,3 +54,13 @@ export async function getUsersById(userIds: string[]) {
 
     return users;
 }
+
+export async function getOrganizationName(organizationId: string) {
+    const clerk = await clerkClient();
+    try {
+        const organization = await clerk.organizations.getOrganization({ organizationId });
+        return organization.name;
+    } catch {
+        return "Organization";
+    }
+}
