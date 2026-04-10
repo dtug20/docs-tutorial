@@ -29,11 +29,19 @@ export async function getUsers(organizationId?: string) {
         organizationId: [targetOrgId],
     });
 
-    const users = response.data.map((user) => ({
-        id: user.id,
-        name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
-        avatar: user.imageUrl,
-    }));
+    const users = response.data.map((user) => {
+        const name = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous";
+        const nameToNumber = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const hue = Math.abs(nameToNumber) % 360;
+        const color = `hsl(${hue}, 80%, 60%)`;
+        
+        return {
+            id: user.id,
+            name,
+            avatar: user.imageUrl,
+            color,
+        };
+    });
 
     return users;
 }
@@ -44,10 +52,16 @@ export async function getUsersById(userIds: string[]) {
     const users = await Promise.all(
         userIds.map(async (userId) => {
             const user = await clerk.users.getUser(userId);
+            const name = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous";
+            const nameToNumber = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const hue = Math.abs(nameToNumber) % 360;
+            const color = `hsl(${hue}, 80%, 60%)`;
+
             return {
                 id: user.id,
-                name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
+                name,
                 avatar: user.imageUrl,
+                color,
             };
         })
     );
